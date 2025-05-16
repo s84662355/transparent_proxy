@@ -11,12 +11,13 @@ go build  -o bin/proxy.exe
  gofumpt -l -w .
 ```
 
+## 启动命令
 ```shell
 ./proxy.exe  --config_path=conf
 ```
 
 
-## conf
+## 配置文件 conf
 
 ```shell
 {
@@ -28,4 +29,3 @@ go build  -o bin/proxy.exe
 
 
 
- 

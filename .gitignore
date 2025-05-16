@@ -1,0 +1,11 @@
+*.exe
+test.go
+test1.go
+/test
+*.test.go
+/bin
+/pkg
+/vendor
+/internal
+.idea
+*.orig

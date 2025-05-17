@@ -21,7 +21,7 @@ go build  -o bin/proxy.exe
 
 ```shell
 {
-	"ProxyUrl":"socks5://test985:test985@8.219.163.116:7777",
+	"ProxyUrl":"socks5://tes85:te985@8.21.16.16:6577",
 	"ProxyType":"socks"
 }
  

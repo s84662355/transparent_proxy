@@ -28,7 +28,7 @@ go build -tags "console" -o bin/console.exe
 
 ```shell
 {
-	"ProxyUrl":"socks5://test985:test985@8.219.163.116:7777",
+	"ProxyUrl":"socks5://test5:tes5@8.29.3.116:17798",
 	"ProxyType":"socks"
 }
  

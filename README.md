@@ -1,8 +1,13 @@
 # transparent_proxy
 
-## 编译
+## 编译gui版本
 ```shell
-go build  -o bin/proxy.exe 
+go build -tags "gui" -o bin/gui.exe 
+```
+
+## 编译console版本
+```shell
+go build -tags "console" -o bin/console.exe 
 ```
 
 
@@ -11,9 +16,9 @@ go build  -o bin/proxy.exe
  gofumpt -l -w .
 ```
 
-## 启动命令
+## 启动命令 控制台版本
 ```shell
-./proxy.exe  --config_path=conf
+./console.exe  --config_path=conf
 ```
 
 
@@ -26,6 +31,10 @@ go build  -o bin/proxy.exe
 }
  
 ```
+
+## gui版本截图
+<img src="assets/gui.png" alt="界面截图">
+<img src="assets/gui1.png" alt="界面截图">
 
 
 

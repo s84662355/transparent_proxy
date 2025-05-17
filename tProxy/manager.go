@@ -33,6 +33,65 @@ func NewManager(proxyJson *ProxyJson) *manager {
 		close(m.exitChan)
 	})
 
+	m.start = sync.OnceValues[<-chan error, error](func() (<-chan error, error) {
+		// 初始化代理服务器
+		if err := m.initProxyServer(); err != nil {
+			return nil, err
+		}
+
+		// 创建网络协议栈
+		if err := m.createStack(); err != nil {
+			m.closeDev() // 关闭设备
+			return nil, err
+		}
+
+		m.channelEpClose = sync.OnceFunc(func() {
+			if m.channelEp != nil {
+				m.channelEp.Close()
+			}
+		})
+
+		m.tTLMap.Start()
+
+		// 添加三个并行运行的守护任务：
+		m.tcm.AddTask(1, func(ctx context.Context) {
+			done := make(chan struct{})
+			go func() {
+				defer close(done)
+				m.runReadStack(ctx) // 运行协议栈读取循环
+			}()
+
+			select {
+			case <-ctx.Done(): // 收到停止信号
+				m.channelEpClose() // 关闭端点
+				m.tcpipStack.Destroy()
+				m.tcpForwarder.Close()
+				<-done // 等待任务完成
+			case <-done: // 任务自然结束
+				return
+			}
+		})
+
+		//  读取 WinDivert 捕获的数据包
+		m.tcm.AddTask(1, func(ctx context.Context) {
+			done := make(chan struct{})
+			go func() {
+				defer close(done)
+				m.runReadDivert(ctx) // 运行数据包捕获循环
+			}()
+
+			select {
+			case <-ctx.Done():
+				m.closeDev() // 关闭设备
+				<-done       // 等待任务完成
+			case <-done:
+				return
+			}
+		})
+
+		return m.exitChan, nil
+	})
+
 	return m
 }
 
@@ -56,74 +115,31 @@ type manager struct {
 	channelEpClose    func()
 	proxyJson         *ProxyJson
 	tTLMap            *TTLMap
+	start             func() (<-chan error, error)
+	stop              sync.Once
 }
 
 // Start 启动代理服务的各个组件
 func (m *manager) Start() (<-chan error, error) {
-	// 初始化代理服务器
-	if err := m.initProxyServer(); err != nil {
-		return nil, err
-	}
-
-	// 创建网络协议栈
-	if err := m.createStack(); err != nil {
-		m.closeDev() // 关闭设备
-		return nil, err
-	}
-
-	m.channelEpClose = sync.OnceFunc(func() {
-		m.channelEp.Close()
-	})
-
-	m.tTLMap.Start()
-
-	// 添加三个并行运行的守护任务：
-	m.tcm.AddTask(1, func(ctx context.Context) {
-		done := make(chan struct{})
-		go func() {
-			defer close(done)
-			m.runReadStack(ctx) // 运行协议栈读取循环
-		}()
-
-		select {
-		case <-ctx.Done(): // 收到停止信号
-			m.channelEpClose() // 关闭端点
-			m.tcpipStack.Destroy()
-			m.tcpForwarder.Close()
-			<-done // 等待任务完成
-		case <-done: // 任务自然结束
-			return
-		}
-	})
-
-	//  读取 WinDivert 捕获的数据包
-	m.tcm.AddTask(1, func(ctx context.Context) {
-		done := make(chan struct{})
-		go func() {
-			defer close(done)
-			m.runReadDivert(ctx) // 运行数据包捕获循环
-		}()
-
-		select {
-		case <-ctx.Done():
-			m.closeDev() // 关闭设备
-			<-done       // 等待任务完成
-		case <-done:
-			return
-		}
-	})
-
-	return m.exitChan, nil
+	return m.start()
 }
 
 // Stop 停止所有服务组件
 func (m *manager) Stop() {
-	m.tcm.Stop() // 停止任务消费者管理器，会触发所有任务的优雅关闭
-	m.exitChanCloseFunc()
-	m.tTLMap.Stop()
-	m.closeDev()       // 关闭设备
-	m.channelEpClose() // 关闭端点
-	m.tcpipStack.Destroy()
-	m.tcpForwarder.Close()
-	fmt.Println("透明rdp代理客户端退出")
+	m.stop.Do(func() {
+		m.tcm.Stop()
+		m.exitChanCloseFunc()
+		m.tTLMap.Stop()
+		m.closeDev()       // 关闭设备
+		m.channelEpClose() // 关闭端点
+		if m.tcpipStack != nil {
+			m.tcpipStack.Destroy()
+		}
+
+		if m.tcpForwarder != nil {
+			m.tcpForwarder.Close()
+		}
+
+		fmt.Println("透明rdp代理客户端退出")
+	})
 }

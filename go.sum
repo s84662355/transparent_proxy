@@ -8,6 +8,8 @@ github.com/Dreamacro/clash v1.18.0 h1:tic7ykTOCaT0mxwAkXo6QP3LN3Nps8oZz9atgr6TU8
 github.com/Dreamacro/clash v1.18.0/go.mod h1:r//xe/2pA3Zl+3fjIiI/o6RjIVd+z87drCD58dpRnFg=
 github.com/Dreamacro/protobytes v0.0.0-20250322142947-26d5983b9568 h1:q5P/QRxB2OaD1ZfIlQ0Qt92LEW8X//dEkNOEjhqbAj0=
 github.com/Dreamacro/protobytes v0.0.0-20250322142947-26d5983b9568/go.mod h1:XWtyZBEG2sKhfn/B6Y6M1FWMJBLqatoWmVXTIv3NA7k=
+github.com/akavel/rsrc v0.10.2 h1:Zxm8V5eI1hW4gGaYsJQUhxpjkENuG91ki8B4zCrvEsw=
+github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/felixge/fgprof v0.9.3 h1:VvyZxILNuCiUCSXtPtYmmtGvb65nqXh2QFWc0Wpf2/g=

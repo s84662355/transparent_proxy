@@ -1,5 +1,7 @@
 # transparent_proxy
 
+透明全局代理，暂时支持socks和http代理
+
 ## 编译gui版本
 ```shell
 go build -tags "gui" -o bin/gui.exe 

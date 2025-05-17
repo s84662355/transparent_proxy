@@ -36,7 +36,7 @@ go build -tags "console" -o bin/console.exe
 
 ## gui版本截图
 <img src="assets/gui.png" alt="界面截图">
-<img src="assets/gui1.png" alt="界面截图">
+<img src="assets/gui1.png" alt="界面截图带代理">
 
 
 

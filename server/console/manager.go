@@ -1,4 +1,4 @@
-package server
+package console
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 // 使用 sync.OnceValue 确保 manager 只被初始化一次（线程安全）
-var newManager = sync.OnceValue(func() *manager {
+var NewManager = sync.OnceValue(func() *manager {
 	m := &manager{
 		tcm: taskConsumerManager.New(), // 任务消费者管理器
 	}

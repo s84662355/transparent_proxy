@@ -88,6 +88,7 @@ func (m *manager) Start() error {
 		proxtT := tProxy.NewManager(proxyJson)
 		m.proxtT = proxtT
 		m.proxyMu.Unlock()
+
 		eCh, err := proxtT.Start()
 		if err != nil {
 			proxtT.Stop()
@@ -110,6 +111,7 @@ func (m *manager) Start() error {
 		m.proxtT = nil
 		m.proxyMu.Unlock()
 		m.startBut.Enable()
+		fmt.Println("代理关闭")
 	})
 
 	// 创建按钮容器，水平排列并居中

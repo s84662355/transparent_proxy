@@ -140,6 +140,9 @@ func (m *manager) createStack() error {
 
 // closeDev 关闭网络设备
 func (m *manager) closeDev() (error, error) {
+	if m.handle == nil {
+		return nil, nil
+	}
 	return m.handle.Shutdown(divert.Both), m.handle.Close()
 }
 

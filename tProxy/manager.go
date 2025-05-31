@@ -82,7 +82,11 @@ func NewManager(proxyJson *ProxyJson) *manager {
 
 		m.tTLMap = NewTTLMap(30 * time.Second)
 
-		m.tTLMap.Start()
+		m.tcm.AddTask(1, func(ctx context.Context) {
+			m.tTLMap.Start()
+			defer m.tTLMap.Stop()
+			<-ctx.Done()
+		})
 
 		// 添加三个并行运行的守护任务：
 		m.tcm.AddTask(1, func(ctx context.Context) {
@@ -146,22 +150,6 @@ func (m *manager) Stop() {
 
 		m.tcm.Stop()
 		m.exitChanCloseFunc()
-		if m.tTLMap != nil {
-			m.tTLMap.Stop()
-		}
-
-		m.closeDev() // 关闭设备
-		if m.channelEpClose != nil {
-			m.channelEpClose() // 关闭端点
-		}
-
-		if m.tcpipStack != nil {
-			m.tcpipStack.Destroy()
-		}
-
-		if m.tcpForwarder != nil {
-			m.tcpForwarder.Close()
-		}
 
 		fmt.Println("透明rdp代理客户端退出")
 	})

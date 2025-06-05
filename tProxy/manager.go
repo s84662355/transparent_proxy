@@ -151,6 +151,19 @@ func (m *manager) Stop() {
 		m.tcm.Stop()
 		m.exitChanCloseFunc()
 
+		m.closeDev()
+		if m.channelEpClose != nil {
+			m.channelEpClose() // 关闭端点
+		}
+
+		if m.tcpipStack != nil {
+			m.tcpipStack.Destroy()
+		}
+
+		if m.tcpForwarder != nil {
+			m.tcpForwarder.Close()
+		}
+
 		fmt.Println("透明rdp代理客户端退出")
 	})
 }

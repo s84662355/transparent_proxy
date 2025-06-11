@@ -211,6 +211,10 @@ func GetInterfaceIndex() (uint32, uint32, uint32, error) {
 		}
 	}
 
+	if mtu == 0 {
+		return 0, 0, 0, fmt.Errorf("获取网络接口mtu失败")
+	}
+
 	return nw.IfIdx, nw.SubIfIdx, mtu, nil
 }
 

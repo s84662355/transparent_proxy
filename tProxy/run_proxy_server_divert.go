@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"os"
 
-	"transparent/gvisor.dev/gvisor/pkg/buffer"
-	"transparent/gvisor.dev/gvisor/pkg/tcpip/header"
-	"transparent/gvisor.dev/gvisor/pkg/tcpip/stack"
-
 	"github.com/lysShub/divert-go"
 	"github.com/pkg/errors"
 	net2 "github.com/shirou/gopsutil/net"
 	"golang.org/x/sys/windows"
+
+	"transparent/gvisor.dev/gvisor/pkg/buffer"
+	"transparent/gvisor.dev/gvisor/pkg/tcpip/header"
+	"transparent/gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
 // runReadDivert 从Windows Divert驱动读取并处理网络数据包
@@ -44,7 +44,7 @@ Loop: // 主循环标签
 		addrCopy := addr // 复制地址结构体
 
 		// 将数据包处理任务提交到任务管理器异步执行
-		m.handlePacket(packetCopy, &addrCopy)
+		m.handlePacket(ctx, packetCopy, &addrCopy)
 
 	}
 }
@@ -52,7 +52,7 @@ Loop: // 主循环标签
 // handlePacket 处理单个网络数据包
 // packet: 数据包字节切片
 // addr: 数据包的目标地址信息
-func (m *manager) handlePacket(packet []byte, addr *divert.Address) {
+func (m *manager) handlePacket(ctx context.Context, packet []byte, addr *divert.Address) {
 	// 1. 基本长度检查
 	if len(packet) < header.IPv4MinimumSize {
 		return
@@ -70,7 +70,7 @@ func (m *manager) handlePacket(packet []byte, addr *divert.Address) {
 	tcpHdr := header.TCP(ipv4.Payload())
 
 	if tcpHdr.Flags().Contains(header.TCPFlagSyn) && !tcpHdr.Flags().Contains(header.TCPFlagAck) {
-		if conns, err := net2.Connections("tcp4"); err == nil && len(conns) > 0 {
+		if conns, err := net2.ConnectionsWithContext(ctx, "tcp4"); err == nil && len(conns) > 0 {
 			// 提取连接四元组信息
 			srcAddr := ipv4.SourceAddress().String()
 			srcPort := tcpHdr.SourcePort()
@@ -85,29 +85,32 @@ func (m *manager) handlePacket(packet []byte, addr *divert.Address) {
 				if connKey == fmt.Sprintf("%s:%d:%s:%d",
 					conn.Laddr.IP, conn.Laddr.Port, conn.Raddr.IP, conn.Raddr.Port) {
 					if ppid == conn.Pid {
-						m.tTLMap.Set(connKey)
 						m.handle.Send(packet, addr)
 						return
 					}
-					break
 				}
 			}
+
+			m.tTLMap.Set(connKey)
+			m.handleProxyConnection(packet)
 		}
-	} else {
-		// 提取连接四元组信息
-		srcAddr := ipv4.SourceAddress().String()
-		srcPort := tcpHdr.SourcePort()
-		dstAddr := ipv4.DestinationAddress().String()
-		dstPort := tcpHdr.DestinationPort()
-		// 存储源地址
-		connKey := fmt.Sprintf("%s:%d:%s:%d", srcAddr, srcPort, dstAddr, dstPort)
-		if m.tTLMap.Get(connKey) {
-			m.handle.Send(packet, addr)
-			return
-		}
+
+		return
 	}
 
-	m.handleProxyConnection(packet)
+	// 提取连接四元组信息
+	srcAddr := ipv4.SourceAddress().String()
+	srcPort := tcpHdr.SourcePort()
+	dstAddr := ipv4.DestinationAddress().String()
+	dstPort := tcpHdr.DestinationPort()
+	// 存储源地址
+	connKey := fmt.Sprintf("%s:%d:%s:%d", srcAddr, srcPort, dstAddr, dstPort)
+	if m.tTLMap.Get(connKey) {
+		m.handleProxyConnection(packet)
+		// m.handle.Send(packet, addr)
+		return
+	}
+	m.handle.Send(packet, addr)
 }
 
 // handleProxyConnection 处理代理连接的数据包

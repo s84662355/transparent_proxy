@@ -172,8 +172,8 @@ func GetInterfaceIndex() (uint32, uint32, uint32, error) {
 
 	errChan := make(chan error, 1)
 	defer func() {
-	  	hd.Close()
-	  	hd.Shutdown(divert.Both)
+		hd.Close()
+		hd.Shutdown(divert.Both)
 		for range errChan {
 		}
 	}()

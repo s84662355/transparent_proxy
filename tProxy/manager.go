@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/lysShub/divert-go" // Windows 网络数据包捕获库
+
 	"transparent/gvisor.dev/gvisor/pkg/tcpip/stack"
 	"transparent/gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
-
 	//	"go.uber.org/zap"                          // 高性能日志库
 	"transparent/gvisor.dev/gvisor/pkg/tcpip/link/channel" // gVisor 的网络栈实现
 	//"transparent/log"
+
 	"transparent/utils/taskConsumerManager"
 )
 
@@ -81,7 +82,6 @@ func NewManager(proxyJson *ProxyJson) *manager {
 		})
 
 		m.tTLMap = NewTTLMap(30 * time.Second)
-
 		m.tcm.AddTask(1, func(ctx context.Context) {
 			m.tTLMap.Start()
 			defer m.tTLMap.Stop()

@@ -6,13 +6,14 @@ import (
 	"net"
 	"sync"
 
-	//"go.uber.org/zap"
+	"go.uber.org/zap"
 	"transparent/gvisor.dev/gvisor/pkg/tcpip/adapters/gonet"
 	"transparent/gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
 	"transparent/gvisor.dev/gvisor/pkg/waiter"
 	//"time"
-	//"transparent/log"
+	"transparent/log"
 	"transparent/proto/http"
+	"transparent/proto/oks"
 	"transparent/proto/socks"
 	"transparent/proto/trojan"
 )
@@ -77,7 +78,7 @@ func (m *manager) transportProtocolHandler(r *tcp.ForwarderRequest) {
 	select {
 	case err := <-errChan: // 1. 任一协程发生错误
 		if err != nil {
-			// log.Error("数据传输错误", zap.Any("error", err))
+			log.Error("数据传输错误", zap.Any("error", err))
 		}
 	case <-m.tcm.Context().Done(): // 2. 上下文被取消
 
@@ -107,6 +108,8 @@ func (m *manager) getConn(addr string) (net.Conn, error) {
 			addr,
 			m.proxyJson.TrojanProxy.InsecureSkipVerify,
 		)
+	case "oks":
+		return oks.GetConn(m.tcm.Context(), m.proxyJson.ProxyUrl, addr)
 	default: // 不支持的代理类型
 
 	}

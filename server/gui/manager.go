@@ -76,6 +76,13 @@ func (m *manager) Start() error {
 		case "socks5":
 			proxyJson.ProxyUrl = text
 			proxyJson.ProxyType = "socks"
+		case "oks":
+			proxyJson.ProxyUrl = text
+			proxyJson.ProxyType = "oks"
+		case "bss":
+			proxyJson.ProxyUrl = text
+			proxyJson.ProxyType = "bss"
+
 		default:
 			dialog.ShowError(fmt.Errorf("不支持类型%s", u.Scheme), w)
 			return

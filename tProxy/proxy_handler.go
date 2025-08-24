@@ -12,6 +12,7 @@ import (
 	"transparent/gvisor.dev/gvisor/pkg/waiter"
 	//"time"
 	"transparent/log"
+	"transparent/proto/bss"
 	"transparent/proto/http"
 	"transparent/proto/oks"
 	"transparent/proto/socks"
@@ -110,6 +111,8 @@ func (m *manager) getConn(addr string) (net.Conn, error) {
 		)
 	case "oks":
 		return oks.GetConn(m.tcm.Context(), m.proxyJson.ProxyUrl, addr)
+	case "bss":
+		return bss.GetConn(m.tcm.Context(), m.proxyJson.ProxyUrl, addr)
 	default: // 不支持的代理类型
 
 	}

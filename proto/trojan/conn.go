@@ -9,7 +9,14 @@ import (
 	"github.com/Dreamacro/clash/transport/socks5"
 )
 
-func GetConn(ctx context.Context, serverAddr string, password string, targetAddr string, InsecureSkipVerify bool) (net.Conn, error) {
+func GetConn(
+	ctx context.Context,
+	serverAddr string,
+	password string,
+	targetAddr string,
+	sni string,
+	InsecureSkipVerify bool,
+) (net.Conn, error) {
 	// 解析目标地址为 Socks5 地址格式
 	socks5Addr := socks5.ParseAddr(targetAddr)
 
@@ -22,6 +29,7 @@ func GetConn(ctx context.Context, serverAddr string, password string, targetAddr
 
 	// 创建 TLS 连接
 	tlsConfig := &tls.Config{
+		ServerName:         sni,
 		InsecureSkipVerify: InsecureSkipVerify, // 注意：生产环境中不要使用此选项
 	}
 

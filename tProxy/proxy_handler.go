@@ -107,6 +107,7 @@ func (m *manager) getConn(addr string) (net.Conn, error) {
 			m.proxyJson.TrojanProxy.Server,
 			m.proxyJson.TrojanProxy.Password,
 			addr,
+			m.proxyJson.TrojanProxy.Domain,
 			m.proxyJson.TrojanProxy.InsecureSkipVerify,
 		)
 	case "oks":

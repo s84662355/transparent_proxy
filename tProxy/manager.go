@@ -81,7 +81,7 @@ func NewManager(proxyJson *ProxyJson) *manager {
 			}
 		})
 
-		m.tTLMap = NewTTLMap(30 * time.Second)
+		m.tTLMap = NewTTLMap(2 * 30 * time.Second)
 		m.tcm.AddTask(1, func(ctx context.Context) {
 			m.tTLMap.Start()
 			defer m.tTLMap.Stop()

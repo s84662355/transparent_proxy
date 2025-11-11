@@ -36,6 +36,7 @@ func (m *manager) initProxyServer() error {
 
 	// 3. 设置WinDivert过滤器
 	filter := fmt.Sprintf("ifIdx = %d and ip and tcp and outbound and not loopback  ", IfIdx)
+
 	handle, err := divert.Open(filter, divert.Network, -1000, 0)
 	if err != nil {
 		return fmt.Errorf("打开WinDivert句柄失败 filter:%s error:%w", filter, err)
